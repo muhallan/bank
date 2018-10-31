@@ -1,8 +1,12 @@
 import os
 
+
 class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI')
+    DEBUG = True
+    SQLALCHEMY_ECHO = False
+    SECRET_KEY = os.getenv('SECRET')
 
 
 class Production(Config):
@@ -12,11 +16,11 @@ class Production(Config):
 class Testing(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///bank_testing_db'
     TESTING = True
-    DEBUG = True
 
 
 class Development(Config):
-    DEBUG = True
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ECHO = True
 
 
 config_dict = {
