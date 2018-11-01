@@ -15,9 +15,9 @@ class RegisterView(MethodView):
         post_data = request.json
 
         # validate the posted data whether it is complete
-        username = post_data.get('username').strip()
-        name = post_data.get('name').strip()
-        password = post_data.get('password').strip()
+        username = post_data.get('username')
+        name = post_data.get('name')
+        password = post_data.get('password')
 
         if not all([username, name, password]):
             response = {
@@ -69,18 +69,18 @@ class LoginView(MethodView):
         # get the post data
         post_data = request.json
 
-        username = post_data.get('username').strip()
-        password = post_data.get('password').strip()
+        username = post_data.get('username')
+        password = post_data.get('password')
 
         if not username or not password:
             response = {
-                'statue': 'success',
+                'status': 'fail',
                 'message': 'Username or password not provided.'
             }
             return make_response(jsonify(response)), 400
 
         try:
-            # find the user 
+            # find the user
             user = User.find_first(username=username)
             if user and user.password_is_valid(password):
                 auth_token = user.generate_token(user.id)

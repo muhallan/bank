@@ -15,7 +15,7 @@ def register_user(self, username=None, password=None, name=None):
     )
 
 
-def login_user(self, username, password):
+def login_user(self, username=None, password=None):
     return self.client.post(
         '/api/v1/auth/login',
         data=json.dumps(dict(
@@ -102,5 +102,71 @@ class TestAuth(BaseTestCase):
                 'Incomplete data. Ensure valid data for username, name '
                 'and password are provided'))
             self.assertFalse(data.get('auth_token'))
+            self.assertTrue(response.content_type == 'application/json')
+            self.assertEqual(response.status_code, 400)
+
+    def test_registered_user_login_successfully(self):
+        """
+        Test the successful login of a registered user
+        """
+        with self.client:
+            # user registration
+            response = register_user(self, 'van.home', 'jhdsdfd', 'van')
+            data = json.loads(response.data.decode())
+            self.assertTrue(data['status'] == 'success')
+            self.assertTrue(
+                data['message'] == 'Successfully registered.'
+            )
+            self.assertTrue(data['auth_token'])
+            self.assertTrue(response.content_type == 'application/json')
+            self.assertEqual(response.status_code, 201)
+
+            # registered user login
+            response_login = login_user(self, 'van.home', 'jhdsdfd')
+            data_login = json.loads(response_login.data.decode())
+            self.assertTrue(data_login['status'] == 'success')
+            self.assertTrue(data_login['message'] == 'Successfully logged in.')
+            self.assertTrue(data_login['auth_token'])
+            self.assertTrue(response_login.content_type == 'application/json')
+            self.assertEqual(response_login.status_code, 200)
+
+    def test_non_registered_user_login(self):
+        """
+        Test that login of a non-registered user fails
+        """
+        with self.client:
+            response = login_user(self, 'joe@bloggs.com', 'ppejdsd')
+            data = json.loads(response.data.decode())
+            self.assertTrue(data['status'] == 'fail')
+            self.assertTrue(data['message'] == 'User does not exist.')
+            self.assertTrue(response.content_type == 'application/json')
+            self.assertEqual(response.status_code, 401)
+
+    def test_missing_login_data(self):
+        """
+        Test that login with incomplete user data fails
+        """
+        with self.client:
+            response = login_user(self)
+            data = json.loads(response.data.decode())
+            self.assertTrue(data['status'] == 'fail')
+            self.assertTrue(data['message'] == 'Username or password '
+                                               'not provided.')
+            self.assertTrue(response.content_type == 'application/json')
+            self.assertEqual(response.status_code, 400)
+
+            response = login_user(self, username='ham')
+            data = json.loads(response.data.decode())
+            self.assertTrue(data['status'] == 'fail')
+            self.assertTrue(data['message'] == 'Username or password '
+                                               'not provided.')
+            self.assertTrue(response.content_type == 'application/json')
+            self.assertEqual(response.status_code, 400)
+
+            response = login_user(self, password='jam')
+            data = json.loads(response.data.decode())
+            self.assertTrue(data['status'] == 'fail')
+            self.assertTrue(data['message'] == 'Username or password '
+                                               'not provided.')
             self.assertTrue(response.content_type == 'application/json')
             self.assertEqual(response.status_code, 400)
