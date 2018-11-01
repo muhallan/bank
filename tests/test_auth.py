@@ -1,4 +1,5 @@
 import json
+import unittest
 from tests.base_test import BaseTestCase
 from models.models import User
 
@@ -170,3 +171,7 @@ class TestAuth(BaseTestCase):
                                                'not provided.')
             self.assertTrue(response.content_type == 'application/json')
             self.assertEqual(response.status_code, 400)
+
+
+if __name__ == '__main__':
+    unittest.main()
