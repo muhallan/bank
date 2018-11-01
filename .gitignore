@@ -1,5 +1,6 @@
 .idea/
 bank_db.db
+bank_testing_db
 .DS_Store
 .env
 tmp

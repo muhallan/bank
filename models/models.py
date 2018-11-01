@@ -12,20 +12,19 @@ class User(ModelMixin):
 
     username = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
-    account_number = db.Column(db.Integer, db.ForeignKey(
-        'account.account_number'), nullable=False, unique=True)
     name = db.Column(db.String(120), nullable=False)
-    account = db.relationship("account",
-                              backref=db.backref("user", uselist=False))
+    account = db.relationship(
+        "Account", uselist=False, back_populates="user",
+        cascade="all, delete-orphan"
+    )
 
-    def __init__(self, username, password, name, account_number):
+    def __init__(self, username, password, name):
         """
         Initialize the user instance
         """
         self.username = username
         self.password = Bcrypt().generate_password_hash(password).decode()
         self.name = name
-        self.account_number = account_number
 
     def password_is_valid(self, password):
         """
@@ -82,8 +81,8 @@ class Account(ModelMixin):
 
     account_number = db.Column(db.Integer, unique=True, nullable=False)
     account_balance = db.Column(db.Integer, default=0)
-    name = db.Column(db.String(120), db.ForeignKey('user.name'))
-    transactions = db.relationship('transaction', backref='account', lazy=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship("User", back_populates="account")
 
     def __init__(self, account_number):
         """
@@ -102,8 +101,9 @@ class Transaction(ModelMixin):
     date = db.Column(db.DateTime, default=db.func.current_timestamp())
     type = db.Column(db.String(50), nullable=False)
     amount = db.Column(db.Integer)
-    account_number = db.Column(db.Integer, db.ForeignKey(
-        'account.account_number'), nullable=False)
+    account_id = db.Column(db.Integer, db.ForeignKey(
+        'account.id'), nullable=False)
+    account = db.relationship('Account', backref='transactions', lazy=True)
 
     def __init__(self, type, amount):
         """
