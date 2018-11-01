@@ -97,7 +97,7 @@ class Account(ModelMixin):
         return self.transactions
 
     def check_balance(self):
-        return self.account_balance.query.all()
+        return self.account_balance
 
 
 class Transaction(ModelMixin):
