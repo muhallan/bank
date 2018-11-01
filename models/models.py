@@ -96,6 +96,9 @@ class Account(ModelMixin):
     def get_transaction_history(self):
         return self.transactions
 
+    def check_balance(self):
+        return self.account_balance
+
 
 class Transaction(ModelMixin):
     """

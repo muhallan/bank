@@ -37,7 +37,7 @@ class DepositView(MethodView):
                         'status': 'success',
                         'message': "Deposit made successfully."
                     }
-                    return make_response(jsonify(response)), 200
+                    return make_response(jsonify(response)), 201
                 else:
                     response = {
                         'status': 'fail',
