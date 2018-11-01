@@ -1,4 +1,7 @@
-from .model_mixin import db, ModelMixin
+import jwt
+from datetime import datetime, timedelta
+from flask_bcrypt import Bcrypt
+from .model_mixin import app, db, ModelMixin
 
 
 class User(ModelMixin):
@@ -20,9 +23,55 @@ class User(ModelMixin):
         Initialize the user instance
         """
         self.username = username
-        self.password = password
+        self.password = Bcrypt().generate_password_hash(password).decode()
         self.name = name
         self.account_number = account_number
+
+    def password_is_valid(self, password):
+        """
+        Check the password against its hash to validate it
+        """
+        return Bcrypt().check_password_hash(self.password, password)
+
+    @staticmethod
+    def generate_token(user_id):
+        """
+        Generates the access token
+        """
+        try:
+            # set up a payload with an expiration time
+            payload = {
+                'exp': datetime.utcnow() + timedelta(hours=4),
+                'iat': datetime.utcnow(),
+                'sub': user_id
+            }
+            # create the byte string token using the payload and the SECRET key
+            jwt_string = jwt.encode(
+                payload,
+                app.config.get('SECRET'),
+                algorithm='HS256'
+            )
+            return jwt_string
+
+        except Exception as e:
+            # return an error in string format if an exception occurs
+            return str(e)
+
+    @staticmethod
+    def decode_token(token):
+        """
+        Decodes the access token from the Authorization header.
+        """
+        try:
+            # decode the token using the SECRET environment variable
+            payload = jwt.decode(token, app.config.get('SECRET'))
+            return payload['sub']
+        except jwt.ExpiredSignatureError:
+            # the token is expired, return an error string
+            return "Expired token. Please login to get a new token"
+        except jwt.InvalidTokenError:
+            # the token is invalid, return an error string
+            return "Invalid token. Please register or login"
 
 
 class Account(ModelMixin):
