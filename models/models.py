@@ -63,8 +63,6 @@ class User(ModelMixin):
         """
         Decodes the access token from the Authorization header.
         """
-        print("token")
-        print(token)
         try:
             # decode the token using the SECRET environment variable
             payload = jwt.decode(token, app.config.get('SECRET_KEY'))
