@@ -74,3 +74,11 @@ class ModelMixin(db.Model):
         and kwargs.
         """
         return cls.query.filter_by(**kwargs).order_by(*args)
+
+    @classmethod
+    def find_first(cls, **kwargs):
+        """
+        Query and filter the data of a model, returning the first result.
+        """
+        return cls.query.filter_by(**kwargs).first()
+

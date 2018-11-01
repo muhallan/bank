@@ -1,6 +1,7 @@
 import jwt
 from datetime import datetime, timedelta
 from flask_bcrypt import Bcrypt
+import logging
 from .model_mixin import app, db, ModelMixin
 
 
@@ -47,12 +48,13 @@ class User(ModelMixin):
             # create the byte string token using the payload and the SECRET key
             jwt_string = jwt.encode(
                 payload,
-                app.config.get('SECRET'),
+                app.config.get('SECRET_KEY'),
                 algorithm='HS256'
             )
             return jwt_string
 
         except Exception as e:
+            logging.error(f"An error while generating a token - {e}")
             # return an error in string format if an exception occurs
             return str(e)
 
@@ -61,9 +63,11 @@ class User(ModelMixin):
         """
         Decodes the access token from the Authorization header.
         """
+        print("token")
+        print(token)
         try:
             # decode the token using the SECRET environment variable
-            payload = jwt.decode(token, app.config.get('SECRET'))
+            payload = jwt.decode(token, app.config.get('SECRET_KEY'))
             return payload['sub']
         except jwt.ExpiredSignatureError:
             # the token is expired, return an error string

@@ -12,6 +12,7 @@ flask-bcrypt = "*"
 pyjwt = "*"
 coverage = "*"
 flask-testing = "*"
+flask-cors = "*"
 
 [dev-packages]
 
