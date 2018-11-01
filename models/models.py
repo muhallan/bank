@@ -124,11 +124,11 @@ class Transaction(ModelMixin):
 
     def deposit(self, amount):
         self.account.account_balance += amount
-        return self.account.save()
+        return self.account.save(), self.account.account_balance
 
     def withdraw(self, amount):
         if amount <= self.account.account_balance:
             self.account.account_balance -= amount
-            return self.account.save()
+            return self.account.save(), self.account.account_balance
         else:
-            return False
+            return False, -1
