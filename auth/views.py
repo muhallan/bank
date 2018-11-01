@@ -15,9 +15,9 @@ class RegisterView(MethodView):
         post_data = request.json
 
         # validate the posted data whether it is complete
-        username = post_data.get('username')
-        name = post_data.get('name')
-        password = post_data.get('password')
+        username = post_data.get('username').strip()
+        name = post_data.get('name').strip()
+        password = post_data.get('password').strip()
 
         if not all([username, name, password]):
             response = {
@@ -61,11 +61,63 @@ class RegisterView(MethodView):
             return make_response(jsonify(response)), 409
 
 
+class LoginView(MethodView):
+    """
+    View to login the user
+    """
+    def post(self):
+        # get the post data
+        post_data = request.json
+
+        username = post_data.get('username').strip()
+        password = post_data.get('password').strip()
+
+        if not username or not password:
+            response = {
+                'statue': 'success',
+                'message': 'Username or password not provided.'
+            }
+            return make_response(jsonify(response)), 400
+
+        try:
+            # find the user 
+            user = User.find_first(username=username)
+            if user and user.password_is_valid(password):
+                auth_token = user.generate_token(user.id)
+                if auth_token:
+                    response = {
+                        'status': 'success',
+                        'message': 'Successfully logged in.',
+                        'auth_token': auth_token.decode()
+                    }
+                    return make_response(jsonify(response)), 200
+            else:
+                response = {
+                    'status': 'fail',
+                    'message': 'User does not exist.'
+                }
+                return make_response(jsonify(response)), 401
+        except Exception as e:
+            print(e)
+            response = {
+                'status': 'fail',
+                'message': 'Try again'
+            }
+            return make_response(jsonify(response)), 500
+
+
 # define the API resources
 registration_view = RegisterView.as_view('register_api')
+login_view = LoginView.as_view('login_api')
+
 # add Rules for API Endpoints
 auth_blueprint.add_url_rule(
     '/auth/register',
     view_func=registration_view,
+    methods=['POST']
+)
+auth_blueprint.add_url_rule(
+    '/auth/login',
+    view_func=login_view,
     methods=['POST']
 )
