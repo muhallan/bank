@@ -116,9 +116,56 @@ class WithdrawView(MethodView):
             return make_response(jsonify(response)), 400
 
 
+class CheckBalance(MethodView):
+    """
+    View to help the user check their balance
+    """
+    @authorization
+    def get(self, *args, **kwargs):
+        # get the user's id from the decorator data
+        user_id = kwargs['user_id']
+        account = Account.find_first(user_id=user_id)
+        balance = account.check_balance()
+        response = {
+            'status': 'success',
+            'account_balance': balance,
+            'message': f"Your account number is: {account.account_number}"
+        }
+        return make_response(jsonify(response)), 200
+
+
+class TransactionHistory(MethodView):
+    """
+    View to show the user's transaction history
+    """
+    @authorization
+    def get(self, *args, **kwargs):
+        # get the user's id from the decorator data
+        user_id = kwargs['user_id']
+        account = Account.find_first(user_id=user_id)
+        history = account.get_transaction_history()
+        all_history = []
+        for transanction in history:
+            data = {
+                'date': transanction.date,
+                'type': transanction.type,
+                'amount': transanction.amount
+            }
+            all_history.append(data)
+
+        response = {
+            'status': 'success',
+            'transaction_history': all_history,
+            'message': f"Your account number is: {account.account_number}"
+        }
+        return make_response(jsonify(response)), 200
+
+
 # define the API resources
 deposit_view = DepositView.as_view('deposit_api')
 withdraw_view = WithdrawView.as_view('withdraw_api')
+check_balance = CheckBalance.as_view('check_balance_api')
+transaction_history = TransactionHistory.as_view('transaction_history_api')
 
 
 # add Rules for API Endpoints
@@ -131,4 +178,14 @@ transaction_blueprint.add_url_rule(
     '/withdraw',
     view_func=withdraw_view,
     methods=['POST']
+)
+transaction_blueprint.add_url_rule(
+    '/check_balance',
+    view_func=check_balance,
+    methods=['GET']
+)
+transaction_blueprint.add_url_rule(
+    '/transaction_history',
+    view_func=transaction_history,
+    methods=['GET']
 )
