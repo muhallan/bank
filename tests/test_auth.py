@@ -28,7 +28,7 @@ def login_user(self, username=None, password=None):
 
 
 class TestAuth(BaseTestCase):
-    def test_registration(self):
+    def test_registration_successful(self):
         """
         Test for successful user registration
         """

@@ -1,7 +1,8 @@
+import logging
+import uuid
 from flask import Blueprint, request, make_response, jsonify
 from flask.views import MethodView
-import logging
-from models.models import User
+from models.models import User, Account
 
 auth_blueprint = Blueprint('auth', __name__, url_prefix='/api/v1')
 
@@ -38,6 +39,13 @@ class RegisterView(MethodView):
                 )
                 # save the user
                 user.save()
+
+                # create an account for this user
+                account = Account(
+                    account_number=str(uuid.uuid4()),
+                    user_id=user.id
+                )
+                account.save()
                 # generate the auth token
                 auth_token = user.generate_token(user.id)
                 response = {
@@ -98,10 +106,10 @@ class LoginView(MethodView):
                 }
                 return make_response(jsonify(response)), 401
         except Exception as e:
-            print(e)
+            logging.error(f"An error has occurred - {e}")
             response = {
                 'status': 'fail',
-                'message': 'Try again'
+                'message': 'An error has occurred. Please try again.'
             }
             return make_response(jsonify(response)), 500
 

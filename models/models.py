@@ -81,16 +81,20 @@ class Account(ModelMixin):
     """
     __tablename__ = 'account'
 
-    account_number = db.Column(db.Integer, unique=True, nullable=False)
+    account_number = db.Column(db.String(120), unique=True, nullable=False)
     account_balance = db.Column(db.Integer, default=0)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship("User", back_populates="account")
 
-    def __init__(self, account_number):
+    def __init__(self, account_number, user_id):
         """
         Initialize the account instance
         """
         self.account_number = account_number
+        self.user_id = user_id
+
+    def get_transaction_history(self):
+        return self.transactions
 
 
 class Transaction(ModelMixin):
@@ -107,9 +111,21 @@ class Transaction(ModelMixin):
         'account.id'), nullable=False)
     account = db.relationship('Account', backref='transactions', lazy=True)
 
-    def __init__(self, type, amount):
+    def __init__(self, type, amount, account_id):
         """
         Initialize the transaction instance
         """
         self.type = type
         self.amount = amount
+        self.account_id = account_id
+
+    def deposit(self, amount):
+        self.account.account_balance += amount
+        return self.account.save()
+
+    def withdraw(self, amount):
+        if amount <= self.account.account_balance:
+            self.account.account_balance -= amount
+            return self.account.save()
+        else:
+            return False
