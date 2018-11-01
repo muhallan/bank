@@ -2,3 +2,5 @@
 bank_db.db
 .DS_Store
 .env
+tmp
+.coverage

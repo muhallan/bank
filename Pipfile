@@ -10,6 +10,8 @@ flask-script = "*"
 flask-migrate = "*"
 flask-bcrypt = "*"
 pyjwt = "*"
+coverage = "*"
+flask-testing = "*"
 
 [dev-packages]
 

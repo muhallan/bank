@@ -26,13 +26,14 @@ class Testing(Config):
     """
     SQLALCHEMY_DATABASE_URI = 'sqlite:///bank_testing_db'
     TESTING = True
+    SECRET_KEY = 'averyrandomstringthatshardtodecode'
 
 
 class Development(Config):
     """
     Development configuration
     """
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
     SQLALCHEMY_ECHO = True
 
 
